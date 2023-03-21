@@ -29,7 +29,6 @@ export default function SignIn() {
       try {
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(user, { displayName: displayName });
-        // Update the user object with the new displayName
         user.displayName = displayName;
         addUserToDB(user, displayName);
         await signInWithEmailAndPassword(auth, email, password);
