@@ -45,7 +45,7 @@ export default function UserWords() {
   
     return (
       <div className="word-form-container flex-basic">
-        {auth.currentUser && <h1>Bonjour, {auth.currentUser.displayName} !</h1>}
+        {auth.currentUser && auth.currentUser.displayName !== null && <h1>Bonjour {auth.currentUser.displayName} !</h1>}
         <h1>Voici votre tableau de mots</h1>
    
         <form onSubmit={handleSubmit} className="word-form">

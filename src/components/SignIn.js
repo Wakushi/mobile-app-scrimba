@@ -1,7 +1,7 @@
 import React from "react";
-import { database, auth } from "../firebaseConfig";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import { database, auth, userExistsInDB, addUserToDB } from "../firebaseConfig";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, sendEmailVerification, signOut } from "firebase/auth";
+import { ref, set, get } from "firebase/database";
 
 export default function SignIn() {
 
@@ -9,42 +9,56 @@ export default function SignIn() {
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
 
-    function addUserToDB(user, displayName) {
-      const db = database
-      const userRef = ref(db, "users/" + user.uid);
-      set(userRef, {
-        displayName: displayName,
-        email: user.email,
-      })
-        .then(() => {
-          console.log("User added to the database.");
-        })
-        .catch((error) => {
-          console.error("Error adding user to the database: ", error);
-        });
-    }
-
-    async function handleSignUp(e) {
+    async function handleSignIn(e) {
       e.preventDefault();
       try {
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(user, { displayName: displayName });
         user.displayName = displayName;
         addUserToDB(user, displayName);
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "/words";
+        await sendEmailVerification(user);
+        alert("Un e-mail de vérification a été envoyé à votre adresse e-mail. Veuillez vérifier votre e-mail et confirmer votre inscription.");
+        await signOut(auth);
+        window.location.href = "/logIn";
       } catch (error) {
         console.log(error);
       }
     }
     
-    
-    
-      
+
+    function handleGoogleSignIn(e) {
+      e.preventDefault();
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then(async (result) => {
+          const user = result.user;
+          const userExists = await userExistsInDB(user.uid);
+          if (!userExists) {
+            return addUserToDB(user, user.displayName);
+          } else {
+            throw new Error("User already exists.");
+          }
+        })
+        .then(() => {
+          window.location.href = "/words";
+        })
+        .catch((error) => {
+          if (error.message === "User already exists.") {
+            alert("Vous êtes déjà inscrit avec ce compte Google.");
+            window.location.href = "/words"
+          } else {
+            console.log(error);
+          }
+        });
+    }
+        
         return (
             <div className="logform signup flex-basic">
                 <h1>Sign Up</h1>
-                <form onSubmit={handleSignUp} className="flex-basic">
+                <button className="btn" type="button" onClick={handleGoogleSignIn}>
+                    Sign Up with Google
+                </button>
+                <form onSubmit={handleSignIn} className="flex-basic">
                     <input
                         className="input"
                         type="text"

@@ -117,7 +117,7 @@ ul {
   gap: 0.5em;
 }
 
-.logform form button {
+.logform .btn {
   cursor: pointer;
 }
 

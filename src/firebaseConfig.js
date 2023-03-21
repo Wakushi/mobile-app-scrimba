@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { ref, set, push, onValue, getDatabase, remove } from "firebase/database";
+import { ref, set, get, push, onValue, getDatabase, remove } from "firebase/database";
 import { getAuth, signOut } from "firebase/auth";
  
 const appSettings = {
@@ -26,6 +26,44 @@ function handleLogout() {
       })
       .catch((error) => {
         console.error("Error logging out: ", error);
+  });
+}
+
+function userExistsInDB(uid) {
+  return new Promise((resolve, reject) => {
+    const db = database;
+    const userRef = ref(db, "users/" + uid);
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking user in the database: ", error);
+        reject(error);
+      });
+  });
+}
+
+function addUserToDB(user, displayName) {
+  return new Promise((resolve, reject) => {
+    const db = database;
+    const userRef = ref(db, "users/" + user.uid);
+    set(userRef, {
+      displayName: displayName,
+      email: user.email,
+    })
+      .then(() => {
+        console.log("User added to the database.");
+        resolve();
+      })
+      .catch((error) => {
+        console.error("Error adding user to the database: ", error);
+        reject(error);
+      });
   });
 }
 
@@ -61,4 +99,4 @@ function deleteWord(userId, wordId) {
   remove(exactLocation)
 }
 
-export { app, database, auth, getUserWords, addWordToUser, deleteWord, handleLogout };
+export { app, database, auth, getUserWords, addWordToUser, deleteWord, handleLogout, userExistsInDB, addUserToDB };

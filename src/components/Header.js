@@ -24,7 +24,6 @@ export default function Header(props) {
             {!isLogged && <a href="/logIn" className="btn btn-debug">Log In</a>}
             {isLogged && <a href="/words" className="btn btn-debug">Words</a>}
             {isLogged && <button className="btn btn-debug" onClick={handleLogout}>Log Out</button>}
-            {/* <button className="btn btn-debug" onClick={props.handleLogout}>Debug</button> */}
         </header>
     )
 }

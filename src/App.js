@@ -28,7 +28,7 @@ export default function App() {
 
   function checkData() {
     console.clear()
-    console.log('User Info: ', user)
+    console.log('User Info: ', auth.currentUser)
   }
 
   return (
